@@ -1,0 +1,1000 @@
+/**
+This 1000 line program is meant to satisfy the requirements of the four differents projects listed below simultaneously, although it was originally meant for just the fish tank function one.
+
+1. Fish Tank Functions (see lines 312-429)
+2. Magic Eight Ball If/Else Statements (see lines 771-835)
+3. Bookshelf Objects (see lines 840-942)
+4. Computational Creatures PVectors (see lines 194-607)  
+
+
+The interactive components of this program are critically important aspects of it. These interactive features include:
+
+1. Fish food can be dragged from its container on the desk and dropped over the middle of the tank, making it fall into the water and attract fish which eat it.
+
+2. Fish can be added to the tank simply by clicking on it. Variables that specify the added fish's traits (lines 34-50) can be easily modified, although its probable that the program will need to be restarted after any are changed. Additionally, if the randomTraits variable (line 34) is set to true, any added fish will have completely random traits. A maximum of 25 fish are allowed.
+
+3. Clicking on the magic eight ball will scale the program so that it fills most of the canvas and displays one of its answers. Clicking again while in this view will zoom back out and select the next answer to be displayed at random.
+
+
+
+Note that the program is almost completely compatable with different canvas sizes.
+
+Put '?width=<desired width>&height=<desired height>' at the end of the URL to change canvas size.
+
+
+**/
+
+{
+
+         //~25 lines\\
+/**//**GLOBAL VARIABLES**//**/
+
+
+/**Added fish variables**/
+
+var randomTraits = false;//Change this to true to give any added fish completely random traits. (Although random fish might not be the best looking)
+
+/**Body shape**/
+
+var bodyLength = 25;//length of body, from 18 to 60
+var bodyWidth = 14;//width (or height) of body, from 14 to 35 
+var tailLength = 12;//length of tail, from 12 to 32
+var tailOpening = 0;//the amount the end of the tail opens by, anywhere from 0 to 70.
+var finSize = 10;//size of fin, from 10 to 25
+
+
+/**Colors and patterns**/
+
+var bodyColor = color(0, 0, 0);//Main body color
+var patternType = 0;//0 = nothing, 1 = dots, more to be added
+var patternColor = color(0, 0, 0);//Color of pattern
+var eyeColor = color(255, 255, 255);//eye color
+
+
+
+var timer = 0;//timer for just about everything that's animated
+
+
+      //~55 lines\\
+/**//**BACKGROUND**//**/
+var Background = function(){
+    
+    stroke(0);
+    strokeWeight(1.2);
+    
+    //Walls
+    background(217, 208, 178);
+    fill(196, 188, 164);
+    quad(-1,-1,85,45,85,401,-1,401);
+    fill(201, 192, 169);
+    quad(-9,-2,85,45,401,45,401,-1);
+    for(var i = 0; i < 10; i++){//horizontal lines on walls
+        line(85,i*45+45,400,i*45+45);
+        line(0,i*59-56,85,i*45);
+    }
+    
+    //Window
+    fill(163, 144, 95);
+    quad(15,95,15,255,63,242,63,108);
+    fill(167, 208, 214);
+    quad(20,100,20,250,60,240,60,110);
+    fill(163, 144, 95);
+    quad(38,104,38,246,42,244,42,105);
+    quad(20,174,20,178,60,178,60,174);
+    
+    //Desk
+    fill(97, 77, 36);
+    rect(50,328,350,10);
+    fill(117, 96, 61);
+    quad(50,328,90,312,400,312,400,328);  
+    fill(74, 53, 27);
+    rect(50,338,5,65);
+    rect(150,338,5,65);
+    rect(370,338,5,65);
+    rect(55,338,350,5);
+    rect(55,378,349,5);
+    fill(89, 69, 39);
+    rect(55,343,95,35);
+    rect(375,343,95,35);
+    rect(55,383,95,35);
+    rect(155,343,215,35);
+    rect(375,383,95,35);
+    fill(38, 28, 5);
+    ellipse(103,361,16,12);
+    ellipse(103,401,16,12);
+    ellipse(261,360,16,12);
+    fill(59, 43, 22);
+    rect(155,383,16,35);
+    
+    //Shelf
+    fill(112, 94, 61);
+    rect(121,125,280,12);
+    fill(92, 72, 39);
+    quad(121,136,150,140,400,140,400,136);
+};
+
+
+
+       //~60 lines\\
+/**//**TANK CONTENTS**//**/
+
+/**Pebbles**/
+
+var pebbles = [[],[],[],[]];//array of all the pebbles' parameters
+
+for(var i = 0; i < 29; i++){
+    pebbles[0].push(random(120,130)+i*7);//x location
+    pebbles[1].push(random(297,300));//y location
+    pebbles[2].push(random(8,14));//size
+    pebbles[3].push(color(random(90,130), random(40,80), random(0,35)));//color
+}//adds 29 pebbles to the pebble array with parameters specified within 
+
+var pebble = function(x,y,s,c){
+    fill(c);
+    noStroke();
+    ellipse(x,y,s,s*2/3);
+};//the function for drawing the pebbles (pretty simple)
+
+
+/**Seaweed**/
+
+var seaweeds = [[],[],[]];//array containing all the seaweed's parameters
+
+for(var i = 0; i < 4; i++){
+    seaweeds[0].push(random(120,150)+i*random(50,60));//x location
+    seaweeds[1].push(random(20,65));//length
+    seaweeds[2].push(color(random(10,30), random(130,160), random(0,30)));//color
+}//adds four seaweed to the seaweed array with parameters specified within 
+
+var seaweed = function(x,l,c){
+    stroke(c);
+    for(var i = 0; i < l; i++){
+        line(x-2+2*sin(i*10+x*10-2*timer),300-i,x+2+2*sin(10*i+x*10-2*timer),300-i);
+    }//main part of seaweed-drawn by lines in a for loop that wave with trigonometry
+    fill(c);
+    noStroke();
+    arc(x+4*sin(i*10+x*10-2*timer),300-i,8,12,180,360);
+};//function for drawing seaweed
+
+
+/**Bubbles**/
+
+//Unlike the seaweed or pebbles, the bubbles are object-oriented.
+
+var bubble = function(x,y){
+    this.y = y;
+    this.x = x;
+    this.a = 1;
+};//constructor function which has the bubbles position and whether it's 'alive'
+
+bubble.prototype.draw = function(){
+    if(this.a === 1){
+        fill(201, 201, 201);
+        ellipse(this.x+3*sin(6*this.y),this.y,8,8);
+        this.y -= 1.5;
+    }//draws bubble and puts it into motion
+    if(this.y < 200){
+        this.a = 0;
+    }//pops bubble
+};
+
+var Bubbles = [];//array containing all bubbles
+
+
+
+    //~110 lines\\
+/**//**FISH FOOD**//**/
+
+/**Pellets**/
+
+var fishFood = function(x,y){
+    this.position = new PVector(x,y);//location vector
+    this.color = color(random(175,225), random(50,100), random(0,20));//color
+    this.eatable = false;//whether it is in a position to attract fish
+    this.held = true;//if it is being dragged out of its container
+    this.falling = false;//whether it's falling to the water after being released
+    this.alive = true;//whether the pellet it is still shown on screen
+    this.velocity = new PVector(0,0);//velocity vector (added tolocation)
+};//constructor for food pellets
+
+fishFood.prototype.draw = function() {
+    
+    noStroke();
+    fill(this.color);
+    //follows mouse if not yet dropped
+    if(this.held === true){
+    pushMatrix();
+    translate(mouseX*400/width+this.position.x,mouseY*400/height+this.position.y);
+    ellipse(0,0,3,3);
+    popMatrix();
+    //if not held it isn't affected by mouse
+    }else{
+        ellipse(this.position.x,this.position.y,3,3);
+    }
+};//appearace of pellets, as well as the translation applyed when being dragged by mouse
+
+fishFood.prototype.move = function(){
+    this.position.add(this.velocity);
+    
+    //drops if mouse is released and it is held
+    if(mouseIsPressed){}else if(this.falling === false){
+        this.held = false;
+        this.position.x += mouseX*400/width;
+        this.position.y += mouseY*400/height;
+        //makes pellet no longer held, thus transitioning the control of its location from the mouse coordinates to its position vector
+    }
+    //What happens when dropped
+    if(this.held === false){
+        //disappears if it isn't in the right dropping location when it's released, otherwise it begins to fall
+        if((this.position.x < 160 || this.position.x > 290 || this.position.y > 180) && this.falling === false){
+        this.alive = false;
+        }else{
+        this.falling = true;
+        }
+        
+    }
+    
+    //how the pellets' location changes when falling
+    if(this.falling === true){
+        if(this.position.y < 198){
+        //gives pellets some random x velocity before they've hit the water, making them appear to shake while falling
+        if(this.eatable === false){
+        this.velocity.x = random(-0.5,0.5);
+        }
+        //gives pellets acceleration downwards while above water
+        this.velocity.y += 0.05;
+        }else{
+            this.velocity.y -= 0.2;
+            this.velocity.y*=0.6;
+            this.velocity.x*=0.99;
+            this.eatable = true;//slows and floats pellets that have hit the water, also allowing them to attract fish  
+        }
+        if(this.position.y <= 198 && this.position.y >= 193 && this.eatable === false){
+            this.velocity.x*=0.25;//upon reaching the water, pellets keep some x velocity that they've aquired at random while falling in order to disperse across the surface.
+            
+        }
+    }
+    
+    if(this.eatable === true && (this.position.x < 160 || this.position.x > 290)){
+        this.velocity.x *= 0.5;
+    }//significantly decreases the x velocity of pellets that move to close to the edges of tank
+    
+};//movement behavior of the fish food
+
+var fishFoods = [];//array of all pellets
+
+/**Container**/
+
+var FFContainer = function(){
+    //body of cotainer
+    fill(166, 86, 20);
+    stroke(0);
+    strokeWeight(1);
+    rect(360,288,21,31);
+    arc(371,319,21,4,0,180);
+    //top
+    fill(0);
+    ellipse(371,289,20,4);
+    //label
+    fill(176, 127, 49);
+    rect(360,293,21,23);
+    arc(371,315,20,4,0,180);
+    fill(166, 86, 20);
+    arc(371,293,21,4,0,180);
+    //text
+    fill(0);
+    textFont(createFont("cursive"),8);
+    text("Fish\nFood",363,304);
+    textFont(createFont("serif"),8);
+    //shadow
+    fill(0,0,0,100);
+    triangle(382,312,382,319,387,312);
+    //when clicked on, anywhere between 10 and 15 fish food pellets are added to the array in random locations near the mouse.
+    mousePressed = function(){
+        if(mouseX > width*9/10 && mouseX < width*381/400 && mouseY > height*18/25 && mouseY < height*321/400){
+            for(var i = 0; i < random(10,15); i++){
+                fishFoods.push(new fishFood(random(-6,6),random(-6,6)));
+            }
+        }
+    };
+};
+
+
+  //~310 lines\\
+/**//**FISH**//**/
+
+var fish = function(x,y,c,bl,bw,tl,to,c2,ec,fl,pt){
+    this.y = y;
+    this.x = x;//location
+    this.c = c;//color
+    this.bl = bl;//body length
+    this.bw = bw;//body width
+    this.tl = tl;//tail length
+    this.to = to;//amount tail opens
+    this.c2 = c2;//color of pattern
+    this.ec = ec;//eye color
+    this.fl = fl;//fin length
+    this.pt = pt;//type of pattern
+    this.d = random(1,2);//direction facing
+    this.velocity = new PVector(0,0);//velocity (added to location)
+    this.acceleration = new PVector(0,0);//acceleration (added to velocity)
+    this.ms = 1;//state of motion
+    this.mst = round(random(1,499));//motion state timer
+    this.eating = false;//whether its being attracted to food
+};//fish constructor function
+
+
+fish.prototype.image = function(){
+
+    
+    if(round(timer%500) === this.mst && this.eating === false){
+        this.ms = floor(random(1,4));//has a chance to put fish into a new motion state every 500 ticks
+    }
+    if(round(timer%500) === this.mst+5){
+        this.ms = 1;//sets motion state back to normal shortly after whenever it changes
+    }
+    
+    //println(round(mag(this.velocity.x,this.velocity.y)*1000)/1000);
+    //println(this.ms);
+    
+    /*noFill();
+    stroke(255,0,0);
+    rect(135,200,180,100);
+    stroke(255, 0, 255);
+    rect(160,220,130,60);*/
+    //Disabled swim boundary boxes
+    
+    
+    /*noFill();
+    stroke(255, 225, 0);
+    if(this.d === 1){
+    ellipse(this.x-this.bl/2,this.y-this.bl/4,10,10);
+    }else{
+    ellipse(this.x+this.bl/2,this.y-this.bl/4,10,10);
+    }*/
+    //Disabled food consumption zone indicator
+    noStroke();
+    
+    //actually display of fish
+    pushMatrix();
+    translate(this.x,this.y);
+    if(this.d === 1){
+    if(this.eating === true){
+        rotate(30);
+    }//rotates fish upwards while eating
+    fill(this.c);
+    //main body
+    bezier(0,0,0-this.bl,0-this.bw,0-this.bl,0+this.bw,0,0);
+    //tail
+    arc(0+this.tl/3,0,this.tl,this.bw/2.5,180,270+this.to);
+    arc(0+this.tl/3,0,this.tl,-this.bw/2.5,180,270+this.to);
+    //fins
+    arc(0-this.bl/3,0,this.fl,this.fl,180,300);
+    arc(0-this.bl/3,0,this.fl,-this.fl,180,300);
+    //eye
+    fill(this.ec);
+    ellipse(0-this.bl*3/5,0-this.bw/10,3,3);
+    
+    if(this.pt === 1){
+        fill(this.c2);
+        ellipse(0-this.bl*9/20,0+this.bw/8,this.bl/5,this.bw/5);
+        ellipse(0-this.bl*3/10,0,this.bl/7,this.bw/7);
+    }//first pattern
+    if(this.pt === 2){
+        
+    }//second pattern (unimplemented)
+    if(this.pt === 3){
+    
+    }//third pattern (unimplemented)
+    }//when facing left
+    
+    
+    if(this.d === 2){
+    if(this.eating === true){
+        rotate(-30);
+    }//rotates fish upwards while eating
+    fill(this.c);
+    //main body
+    bezier(0,0,0+this.bl,0-this.bw,0+this.bl,0+this.bw,0,0);
+    //tail
+    arc(0-this.tl/3,0,this.tl,this.bw/2.5,270-this.to,360);
+    arc(0-this.tl/3,0,this.tl,-this.bw/2.5,270-this.to,360);
+    //fins
+    arc(0+this.bl/3,0,this.fl,this.fl,240,360);
+    arc(0+this.bl/3,0,this.fl,-this.fl,240,360);
+    //eye
+    fill(this.ec);
+    ellipse(0+this.bl*3/5,0-this.bw/10,3,3);
+    
+    if(this.pt === 1){
+        fill(this.c2);
+        ellipse(0+this.bl*9/20,0+this.bw/8,this.bl/5,this.bw/5);
+        ellipse(0+this.bl*3/10,0,this.bl/7,this.bw/7);
+    }//first pattern
+    if(this.pt === 2){
+    
+    }//second pattern (unimplemented)
+    if(this.pt === 3){
+    
+    }//third pattern (unimplemented)
+    }//when facing right
+    popMatrix();
+    
+};
+
+fish.prototype.move = function(){
+    this.x += this.velocity.x;
+    this.y += this.velocity.y;
+    this.velocity.add(this.acceleration);
+    
+    if(this.velocity.x > 0.01){
+        this.d = 2;
+    }
+    if(this.velocity.x < -0.01){
+        this.d = 1;
+    }//how direction is determined by velocity
+        
+        
+    if(this.velocity.x > 0.1 || this.velocity.x < -0.075){
+            this.acceleration.x = -this.velocity.x/150;
+        }
+    if(this.velocity.y > 0.1 || this.velocity.y < -0.075){
+        this.acceleration.y = -this.velocity.y/150;
+    }
+        
+        
+    if(this.ms === 1){
+        if(this.velocity.x > 0.025 || this.velocity.x < -0.025){
+            this.acceleration.x = -this.velocity.x/500;
+        }else{
+            this.acceleration.x = random(-0.015,0.015);
+        }
+        
+        if(this.velocity.y > 0.025 || this.velocity.y < -0.025){
+            this.acceleration.y = -this.velocity.y/500;
+        }else{
+            this.acceleration.y = random(-0.015,0.015);
+        }
+    }//normal state of motion where the acceleration is random and the velocity kept within an acceptable range
+    
+    
+    if(this.ms === 2){
+        this.velocity.x*=1.75;
+        this.velocity.y*=1.25;
+    }//causes fish to suddenly dart across tank in the second motion state
+    
+    if(this.ms === 3){
+        this.velocity.mult(0.85);
+        if(this.d === 1){
+        Bubbles.push(new bubble(this.x-this.bl,this.y));
+        }
+        if(this.d === 2){
+        Bubbles.push(new bubble(this.x+this.bl,this.y));
+        }
+    }//causes fish to suddenly slow down and release a bubble in the third motion state
+    
+    
+    //Slows and reverses fish that are heading towards edges of tank:
+    
+    if(this.x < 160 || this.x > 290 || this.y < 220 || this.y > 280){
+        this.ms = 1;
+    }
+    
+    if(this.x < 160){
+        this.d = 2;
+        if(this.velocity.x < 0){
+        this.acceleration.x = -this.velocity.x/200 + 0.0005;
+        } else{
+            this.acceleration.x = 0.0005;
+        }
+    }
+    if(this.x < 145){
+        this.d = 2;
+        if(this.velocity.x < 0){
+        this.acceleration.x = -this.velocity.x/20 + 0.0025;
+        } else{
+            this.acceleration.x = 0.0025;
+        }
+    }
+    
+    if(this.x > 290){
+        this.d = 1;
+        if(this.velocity.x > 0){
+        this.acceleration.x = -this.velocity.x/200 - 0.0005;
+        } else{
+            this.acceleration.x = -0.0005;
+        }
+    }
+    if(this.x > 305){
+        this.d = 1;
+        if(this.velocity.x > 0){
+        this.acceleration.x = -this.velocity.x/20 - 0.0025;
+        } else{
+            this.acceleration.x = -0.0025;
+        }
+    }
+    
+    if(this.y < 220){
+        if(this.velocity.y < 0){
+        this.acceleration.y = -this.velocity.y/200 + 0.0005;
+        } else{
+            this.acceleration.y = 0.0005;
+        }
+    }
+    if(this.y < 208){
+        if(this.velocity.y < 0){
+        this.acceleration.y = -this.velocity.y/20 + 0.0025;
+        } else{
+            this.acceleration.y = 0.0025;
+        }
+    }
+    
+    if(this.y > 280){
+        if(this.velocity.y > 0){
+        this.acceleration.y = -this.velocity.y/200 - 0.0005;
+        } else{
+            this.acceleration.y = -0.0005;
+        }
+    }
+    if(this.y > 292){
+        if(this.velocity.y > 0){
+        this.acceleration.y = -this.velocity.y/20 - 0.0025;
+        } else{
+            this.acceleration.y = -0.0025;
+        }
+    }
+    
+    //puts a limit on the fish's velocity 
+    if(this.velocity.x > 0.75){
+        this.velocity.x = 0.75;
+    }
+    if(this.velocity.x < -0.75){
+        this.velocity.x = -0.75;
+    }
+    if(this.velocity.y > 0.5){
+        this.velocity.y = 0.5;
+    }
+    if(this.velocity.y < -0.5){
+        this.velocity.y = -0.5;
+    }
+};
+
+var ediblexs = [[],[],[]];//array of all edible pellets' xs and those to each side of the fish
+fish.prototype.eat = function(){
+    
+    
+    for(var i = 0; i < fishFoods.length; i++){
+        if(fishFoods[i].eatable === true && fishFoods[i].alive === true){  
+        ediblexs[0].push(round(fishFoods[i].position.x));//fills the ediblexs array with all the edible food pellets' xs
+        
+        if(fishFoods[i].position.x < this.x){
+            ediblexs[1].push(round(fishFoods[i].position.x));//all pellets' x locations that are to the left of fish get a place in the second ediblexs array, while all to the right are put in the third array. 
+        }else{
+            ediblexs[2].push(round(fishFoods[i].position.x));
+            
+        }
+
+            if((this.d === 2 && dist(fishFoods[i].position.x,fishFoods[i].position.y,this.x+this.bl/2,this.y-this.bl/4) < 10) || (this.d === 1 && dist(fishFoods[i].position.x,fishFoods[i].position.y,this.x-this.bl/2,this.y-this.bl/4) < 10)){
+            fishFoods[i].alive = false;
+        }//makes food disappear when it is in the fish's 'eating zone'
+        }
+    }
+    //makes fish move to food:
+    if(ediblexs[0].length > 0){
+    if(this.x > 160 && this.x < 290){
+    this.acceleration.x = (ediblexs[2].length/ediblexs[0].length-ediblexs[1].length/ediblexs[0].length)/1000;
+    //the x acceleration of the fish is determined by the number of pellets to the right divided by the total number minus the number of pellets to the left over the total, all scaled down to a practical level. Due to this, the fish move in the direction where the most food is present, but their speed is decreased by increasing amounts of food in the other direction.
+    }
+    if(this.y > 215){
+        this.acceleration.y = -0.0025;
+        this.eating = true;
+    }//makes fish move to surface
+    }else{
+        this.eating = false;
+    }
+    
+    if(ediblexs[1].length > ediblexs[2].length){
+        this.d = 1;
+    }
+    if(ediblexs[2].length > ediblexs[1].length){
+        this.d = 2;
+    }//while eating, the fish's direction is determined by whether there are more pellets to its left, or to its right.
+    
+    
+    ediblexs = [[],[],[]];//resets the ediblexs array so it doesn't add on itself every tick
+};
+
+var Fishs = [];//array containing all fish
+
+
+//fish present at beginning of program
+
+//purple
+Fishs.push(new fish(270,255,color(111, 4, 199),40,22,25,30,color(213, 0, 255),color(209, 149, 46),15,1));
+//orange
+Fishs.push(new fish(180,230,color(227, 83, 12),30,18,15,10,color(245, 155, 10),color(255, 0, 242),18,2));
+
+
+
+
+    //~140 lines\\
+/**//**THE TANK**//**/
+
+var drawTank = function(){
+    
+    stroke(0);
+    strokeWeight(1.2);
+    
+    //Base drawing
+    fill(64, 64, 64);
+    rect(110,304,220,18);
+    fill(56, 56, 56);
+    quad(330,304,340,298,340,316,330,322);
+    fill(143, 143, 143);
+    quad(110,304,330,304,340,298,129,298);
+    for(var i = 0; i < 5; i++){
+        fill(43, 43, 43);
+        noStroke();
+        rect(i*42+122,310,25,8,3);
+    }
+    
+    //Glass 
+    stroke(0,0,0);
+    strokeWeight(0.4);
+    fill(138, 145, 145,80);
+    rect(110,185,220,119);
+    quad(330,304,340,298,340,183,330,185);
+    quad(110,185,330,185,340,183,129,183);
+    line(129,183,129,297);
+    
+    //Water (layer behind tank contents)
+    stroke(110, 150, 150,90);
+    strokeWeight(2);
+    for(var i = 129; i < 340; i++){
+        line(i,195-2.5*sin(5*i-2*timer),i,296);
+    }
+    for(var i = 111; i < 129; i++){
+        line(i,195-2.5*sin(10*i+2*timer),i,302-(i-111)*0.3);
+    }
+    
+    
+    /**Everything inside the tank**/
+    
+    
+    //Draws all seaweed
+    for(var i = 0; i < seaweeds[0].length; i++){
+        seaweed(seaweeds[0][i],seaweeds[1][i], seaweeds[2][i]);
+    }
+    
+    
+    //Bubbles
+    
+    //Makes a new bubble come for every 150th tick
+    if(timer%150 === 1){
+Bubbles.push(new bubble(random(115,325),300));
+}
+
+    //disabled code that makes a new bubble when you click in the tank
+    
+    /*mouseClicked = function(){
+    if(mouseX>115&&mouseX<330&&mouseY>200&&mouseY<300){
+        Bubbles.push(new bubble(mouseX,mouseY));
+    }
+};*/
+    
+    //draws all bubbles
+    for(var i = 0; i < Bubbles.length; i++){
+    Bubbles[i].draw();
+    }
+    
+
+    
+    
+    
+    
+    //Fish
+    
+    
+    //Displays and moves all fish 
+    for(var i = 0; i < Fishs.length; i++){
+        Fishs[i].image();
+        Fishs[i].move();
+        Fishs[i].eat();
+    }
+    
+    
+    //Adds fish when mouse is pressed over the tank and there are no more than 25 fish
+    mouseClicked = function(){
+        if(mouseX>width*135/400&&mouseX<width*315/400&&mouseY>height/2&&mouseY<height*3/4){
+        if(Fishs.length < 26){
+        //for random fish
+        if(randomTraits === true){
+        Fishs.push(new fish(mouseX*400/width,mouseY*400/height,color(random(0,255),random(0,255), random(0,255)),random(18,60),random(14,35),random(12,32),random(0,70),color(random(0,255), random(0,255), random(0,255)),color(random(0,255), random(0,255), random(0,255)),random(10,25),round(random(0,1))));
+        //for non-random fish
+        }else if(bodyLength >= 18 && bodyLength <= 60 && bodyWidth >= 14 && bodyWidth <= 35 && tailLength >= 12 && tailLength <= 32 && tailOpening >= 0 && tailOpening <= 70 && finSize >= 10 && finSize <= 25){
+            Fishs.push(new fish(mouseX*400/width,mouseY*400/height,color(bodyColor),bodyLength,bodyWidth,tailLength,tailOpening,color(patternColor),color(eyeColor),finSize,patternType));
+        }
+        //lets you know when the number of fish has exceeded the maximum limit
+        }else{
+            println("Too many fish!");
+        }
+        }
+    };
+    
+    
+    
+    //House drawing
+    pushMatrix();
+    translate(64,200);
+    fill(128, 116, 82);
+    //main structure
+    arc(217,99,50,69,180,360);
+    fill(92, 79, 59);
+    //openings
+    for(var i = 0; i < 3; i++){
+        arc(200+i*2,100-i*0.5,20,40,180,360);
+        arc(235-i*2,100-i*0.5,20,40,180,360);
+    }
+    fill(26, 26, 26);
+    arc(200,100,15,35,180,360);
+    arc(235,100,15,35,180,360);
+    popMatrix();
+    
+    
+    //draws all pebbles
+    for(var i = 0; i < pebbles[0].length; i++){
+        pebble(pebbles[0][i],pebbles[1][i], pebbles[2][i],pebbles[3][i]);
+    }
+    
+    
+    
+    //Water in front of tank contents
+    stroke(110, 150, 150,90);
+    strokeWeight(2);
+    for(var i = 330; i < 340; i++){
+        line(i,195-2.5*sin(10*i+1*timer),i,302-(i-330)*0.6);
+    }
+    for(var i = 110; i < 330; i++){
+        line(i,199-2.5*sin(5*i+2*timer),i,303);
+    }
+};
+
+
+
+       //~230 lines\\
+/**//**STUFF ON SHELF**//**/
+
+
+/**Magic Eight Ball**/
+var M8BV = 0;//whether the program is in the magic eigth ball view
+var M8BA;//The magic eight ball answer
+var M8Ball = function(){
+    
+    //Gradient ball for 3D effect
+    for(var i = 0; i < 18; i++){
+    fill(i*3+20, i*3+20, i*3+20);
+    noStroke();
+    ellipse(300-(i/2),110-(i/6),30-i*1.5,30-i*1.5);
+    }
+    //Blue triangles
+    fill(20, 46, 161);
+    triangle(298,115,301,99,312,110);
+    fill(16, 54, 207);
+    triangle(299,114,301.5,100.5,311,109.75);
+    //Words when not in close-up view
+    if(M8BV%2 === 0){
+        stroke(120,210,230);
+        line(301,110,307,108);
+        line(302,107,305,106);
+    }
+    
+    
+    //Answers
+    if(M8BV%2 === 1){
+        //Font, fill, size, and rotation of text
+        fill(120, 210, 230);
+        textFont(createFont("serif"),2);
+        pushMatrix();
+        translate(296,108);
+        rotate(-19);
+        
+        //The 9 possible answers
+        if(M8BA === 1){
+        text("\n            Of\n         course",0,0);
+        }else if(M8BA === 2){
+        text("\n\n       Probably",0,0);
+        }else if(M8BA === 3){
+        text("           Ask\n          again\n           later",0,0);
+        }else if(M8BA === 4){ 
+        text("            The\n        chances\n        are slim.",0,0);
+        }else if(M8BA === 5){
+        text("           You\n          know\n            the\n        answer...",0,0);
+        }else if(M8BA === 6){
+        text("             I\n          can't\n           say",0,0);
+        }else if(M8BA === 7){
+        text("\n          Nope",0,0);
+        }else if(M8BA === 8){
+        text("\n            Not\n        anytime\n           soon",0,0);
+        }else if(M8BA === 9){
+        text("          Clear\n          your\n       mind and\n       ask again",0,0);
+        }
+        
+        popMatrix();
+    }
+    
+    
+
+    
+    mouseReleased = function(){
+        if(M8BV%2 === 1 || (dist(mouseX,mouseY,width*3/4,height*11/40) < width*3/80 && M8BV%2 === 0)){
+            M8BV++;//Changes the view under the right conditions
+            
+        }
+        M8BA = floor(random(1,10));//Selects a new answer at random when mouse is released
+    };
+};
+
+
+/**Books**/
+
+//I apologize for not including book ratings or authors in the program, but with the way the books were drawn on the shelf, it would be very difficult to display any text or images on them other than basic titles in a practical way. I hope that other traits specified in the objects make up for this, such as the book width, book height, title text size, title x (which is relative to the book x), and title y (which is relative to the shelf). 
+
+var books = [{
+    title: "The Thirsty Tree",
+    titleSize: 10,
+    titlex: 10,
+    titley: 75,
+    color: color(181, 139, 40),
+    width: 15,
+    height: 75,
+    x: 140
+},{
+    title: "Intermediate\n   Algebra",
+    titleSize: 9,
+    titlex: 8,
+    titley: 55,
+    color: color(72, 168, 50),
+    width: 20,
+    height: 60,
+    x: 155
+
+},{
+    title: "Jack and the\n  Wormhole",
+    titleSize: 10,
+    titlex: 8,
+    titley: 62,
+    color: color(143, 104, 173),
+    width: 22,
+    height: 65,
+    x: 183
+},{
+    title: "GMOs",
+    titleSize: 12,
+    titlex: 12,
+    titley: 48,
+    color: color(166, 98, 142),
+    width: 16,
+    height: 55,
+    x: 205
+},{
+    title: "Fish as Pets",
+    titleSize: 11,
+    titlex: 11,
+    titley: 70,
+    color: color(108, 122, 184),
+    width: 15,
+    height: 78,
+    x: 230
+},{
+    title: "Zombies",
+    titleSize: 12,
+    titlex: 12,
+    titley: 62,
+    color: color(133, 113, 96),
+    width: 16,
+    height: 72,
+    x: 244
+},{
+    title: "JavaScript",
+    titleSize: 12,
+    titlex: 12,
+    titley: 65,
+    color: color(171, 163, 118),
+    width: 19,
+    height: 74,
+    x: 317
+},{
+    title: "The Town of\n Greenville",
+    titleSize: 9,
+    titlex: 9,
+    titley: 61,
+    color: color(103, 156, 108),
+    width: 21,
+    height: 67,
+    x: 335
+},{
+    title: "Texas",
+    titleSize: 13,
+    titlex: 11,
+    titley: 54,
+    color: color(161, 121, 52),
+    width: 15,
+    height: 65,
+    x: 259
+},{
+    title: "Terraria",
+    titleSize: 13,
+    titlex: 12,
+    titley: 60,
+    color: color(52, 158, 52),
+    width: 16,
+    height: 73,
+    x: 369
+},{
+    title: "The French\n     Horn",
+    titleSize: 9,
+    titlex: 9,
+    titley: 57,
+    color: color(168, 143, 43),
+    width: 20,
+    height: 67,
+    x: 384
+}];//This is the array containing all book objects. Each object has its book's title, title text size, title x and y, color, width and height, and x location.
+
+var drawBooks = function(){
+    for(var i = 0; i < books.length; i++){
+        //sets fill and stroke
+        fill(books[i].color);
+        stroke(0,0,0);
+        strokeWeight(0.4);
+        //draws the spine 
+        rect(books[i].x,125-books[i].height,books[i].width,books[i].height);
+        //cover (barely visible)
+        quad(books[i].x+books[i].width,125-books[i].height,books[i].x+books[i].width,125,books[i].x+books[i].width+4,125,books[i].x+books[i].width+4,125-books[i].height+6);
+        //cover shadow
+        fill(0,0,0,80);
+        noStroke();
+        quad(books[i].x+books[i].width,125-books[i].height,books[i].x+books[i].width,125,books[i].x+books[i].width+4,125,books[i].x+books[i].width+4,125-books[i].height+6);
+        //title text
+        textSize(books[i].titleSize);
+        fill(0, 0, 0);
+        pushMatrix();
+        translate(books[i].x+books[i].titlex,125-books[i].height+books[i].titley);
+        rotate(-90);
+        text(books[i].title,0,0);
+        popMatrix();
+    }
+};//Draws all the books according to the information in their objects
+
+
+
+
+
+
+
+
+
+//Draws everything!!
+draw = function() {
+background(255, 255, 255);//Background behind all else (not really needed) 
+pushMatrix();//allows for transformations used to zoom on the magic eight ball and to scale the program on canvas sizes other than 400x400
+scale(width/400,height/400);
+if(M8BV%2 === 1){
+    scale(10);
+    translate(-280,-91);
+}//magic eight ball zoom
+Background();//background drawing
+drawBooks();//books
+M8Ball();//magic eight ball
+FFContainer();//fish food container
+for(var i = 0; i < fishFoods.length; i++){
+    if(fishFoods[i].alive === true){
+    fishFoods[i].draw();
+    fishFoods[i].move();
+    }
+}//draws all fish food pellets if they are 'alive'
+drawTank();//draws fish tank
+popMatrix();//stops transformations
+timer++;//makes timer go
+};
+}//The code (cleanly commented)
