@@ -26,6 +26,7 @@ Put '?width=<desired width>&height=<desired height>' at the end of the URL to ch
 
 {
 
+
          //~25 lines\\
 /**//**GLOBAL VARIABLES**//**/
 
@@ -51,9 +52,7 @@ var patternColor = color(0, 0, 0);//Color of pattern
 var eyeColor = color(255, 255, 255);//eye color
 
 
-
 var timer = 0;//timer for just about everything that's animated
-
 
       //~55 lines\\
 /**//**BACKGROUND**//**/
@@ -797,6 +796,7 @@ var M8Ball = function(){
         pushMatrix();
         translate(296,108);
         rotate(-19);
+        textLeading(2);
         
         //The 9 possible answers
         if(M8BA === 1){
